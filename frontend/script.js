@@ -128,47 +128,64 @@ document.addEventListener('DOMContentLoaded', () => {
         }
     });
 
-    // Add Book (POST Request) 
+    // Add Book (POST Request)
     document.getElementById("add-book-form").addEventListener("submit", async (e) => {
         e.preventDefault();
-        const formData = new FormData(e.target);
-        const bookData = Object.fromEntries(formData.entries());
+
+        const bookData = {
+            library_id: document.getElementById("library-id").value,
+            genre_id: document.getElementById("genre-id").value,
+            publisher_id: document.getElementById("publisher-id").value,
+            title: document.getElementById("title").value,
+            isbn: document.getElementById("isbn").value,
+            publication_date: document.getElementById("publication-date").value,
+        };
 
         try {
             const response = await fetch(`${baseUrl}/books/`, {
                 method: "POST",
                 headers: { "Content-Type": "application/json" },
-                body: JSON.stringify(bookData)
+                body: JSON.stringify(bookData),
             });
-            
+
+            if (!response.ok) {
+                const errorData = await response.json();
+                throw new Error(errorData.detail || "Failed to add book");
+            }
+
             const result = await response.json();
-            if (!response.ok) throw new Error(result.detail);
-            
             showResponse(`Book added successfully (ID: ${result.book_details.new_book_id})`);
-            clearForm("add-book-form");
         } catch (error) {
             showResponse(`Failed to add book: ${error.message}`, true);
         }
     });
 
-    // Borrow Book (POST Request) 
+    // Borrow Book (POST Request)
     document.getElementById("borrow-book-form").addEventListener("submit", async (e) => {
         e.preventDefault();
-        const formData = new FormData(e.target);
-        const transactionData = Object.fromEntries(formData.entries());
+
+        // Collect form data
+        const transactionData = {
+            member_id: document.getElementById("member-id").value,
+            book_id: document.getElementById("book-id-borrow").value,
+            staff_id: document.getElementById("staff-id").value,
+        };
 
         try {
+            // Send POST request to Borrow Book API
             const response = await fetch(`${baseUrl}/transactions/borrow/`, {
                 method: "POST",
                 headers: { "Content-Type": "application/json" },
-                body: JSON.stringify(transactionData)
+                body: JSON.stringify(transactionData),
             });
-            
+
+            if (!response.ok) {
+                const errorData = await response.json();
+                throw new Error(errorData.detail || "Failed to borrow book");
+            }
+
             const result = await response.json();
-            if (!response.ok) throw new Error(result.detail);
-            
-            showResponse(`Transaction created (ID: ${result.transaction_details.new_transaction_id})`);
-            clearForm("borrow-book-form");
+            showResponse(`Transaction created successfully (ID: ${result.transaction_details.new_transaction_id})`);
         } catch (error) {
             showResponse(`Failed to borrow book: ${error.message}`, true);
         }
