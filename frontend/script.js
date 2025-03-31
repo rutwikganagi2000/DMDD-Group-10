@@ -1,197 +1,198 @@
-const baseUrl = "http://localhost:8000"; // Base URL for your FastAPI backend
-
-// Toggle visibility of content
-function toggleVisibility(elementId) {
-    const element = document.getElementById(elementId);
-    if (element.style.display === "none") {
-        element.style.display = "block";
-    } else {
-        element.style.display = "none";
+document.addEventListener('DOMContentLoaded', () => {
+    // Preloader Animation - Fixed
+    function preloaderAnimation() {
+        const greetingElement = document.querySelector('.greeting');
+        const greetings = [
+            ". Dennis Sharon (NOVIS)",
+         ". Dennis Sharon Cheruvathoor",//starts
+            ". Sachin Vishaul Baskar",
+            ". Rutwik Ganagi",
+            ". Ashwin Badamikar", 
+            ". Chetan Warad ",//ends
+        ];
+        
+        let currentIndex = 0;
+        
+        // Change greeting every 1.5 seconds
+        const interval = setInterval(() => {
+            currentIndex = (currentIndex + 1) % greetings.length;
+            greetingElement.textContent = greetings[currentIndex];
+        }, 1500);
+        
+        // Hide preloader after 6 seconds
+        setTimeout(() => {
+            const preloader = document.querySelector('.preloader');
+            preloader.style.opacity = '0';
+            
+            // Remove preloader from DOM after fade out
+            setTimeout(() => {
+                preloader.style.display = 'none';
+                clearInterval(interval);
+            }, 800);
+        }, 8200);
     }
-}
-
-// Fetch Books (GET Request)
-document.getElementById("fetch-books").addEventListener("click", async () => {
-    const booksList = document.getElementById("books-list");
-    toggleVisibility("books-list");
-
-    if (booksList.style.display === "block") {
-        try {
-            const response = await fetch(`${baseUrl}/books/`, { method: "GET" });
-
-            if (!response.ok) {
-                throw new Error(`Error fetching books: ${response.status}`);
-            }
-
-            const books = await response.json();
-            booksList.innerHTML = "";
-
-            books.forEach(book => {
-                const listItem = document.createElement("li");
-                listItem.textContent = `${book.title} - ${book.library_name}`;
-                booksList.appendChild(listItem);
-            });
-        } catch (error) {
-            console.error(error.message);
-            alert("Failed to fetch books.");
-        }
-    }
-});
-
-// Fetch Overdue Transactions (GET Request)
-document.getElementById("fetch-overdue-transactions").addEventListener("click", async () => {
-    const transactionsList = document.getElementById("transactions-list");
-    toggleVisibility("transactions-list");
-
-    if (transactionsList.style.display === "block") {
-        try {
-            const response = await fetch(`${baseUrl}/transactions/overdue/`, { method: "GET" });
-
-            if (!response.ok) {
-                throw new Error(`Error fetching transactions: ${response.status}`);
-            }
-
-            const transactions = await response.json();
-            transactionsList.innerHTML = "";
-
-            transactions.forEach(transaction => {
-                const listItem = document.createElement("li");
-                listItem.textContent =
-                    `${transaction.member_name} borrowed "${transaction.book_title}" and is overdue since ${transaction.due_date}`;
-                transactionsList.appendChild(listItem);
-            });
-        } catch (error) {
-            console.error(error.message);
-            alert("Failed to fetch overdue transactions.");
-        }
-    }
-});
-
-// Fetch Book Authors (GET Request)
-document.getElementById("fetch-authors-form").addEventListener("submit", async (e) => {
-    e.preventDefault(); // Prevent form submission
-
-    const bookId = document.getElementById("book-id").value;
-    const authorsList = document.getElementById("authors-list");
-    toggleVisibility("authors-list");
-
-    if (authorsList.style.display === "block") {
-        try {
-            const response = await fetch(`${baseUrl}/books/${bookId}/authors/`, { method: "GET" });
-
-            if (!response.ok) {
-                throw new Error(`Error fetching authors for book ID ${bookId}: ${response.status}`);
-            }
-
-            const authors = await response.json();
-            authorsList.innerHTML = "";
-
-            authors.forEach(author => {
-                const listItem = document.createElement("li");
-                listItem.textContent =
-                    `${author.first_name} ${author.last_name} (${author.author_role}) - Contribution: ${author.contribution_percentage}%`;
-                authorsList.appendChild(listItem);
-            });
-        } catch (error) {
-            console.error(error.message);
-            alert(`Failed to fetch authors for book ID ${bookId}.`);
-        }
-    }
-});
-
-// Add Book (POST Request)
-document.getElementById("add-book-form").addEventListener("submit", async (e) => {
-    e.preventDefault(); // Prevent form submission
-
-    const libraryId = document.getElementById("library-id").value;
-    const genreId = document.getElementById("genre-id").value;
-    const publisherId = document.getElementById("publisher-id").value;
-    const title = document.getElementById("title").value;
-    const isbn = document.getElementById("isbn").value;
-    const publicationDate = document.getElementById("publication-date").value;
-
-    const bookData = { library_id: libraryId, genre_id: genreId, publisher_id: publisherId, title, isbn, publication_date: publicationDate };
-
-    try {
-        const response = await fetch(`${baseUrl}/books/`, {
-            method: "POST",
-            headers: { "Content-Type": "application/json" },
-            body: JSON.stringify(bookData),
-        });
-
-        if (!response.ok) {
-            throw new Error(`Error adding book: ${response.status}`);
-        }
-
-        const result = await response.json();
-        document.getElementById("response").innerHTML =
-            `<p>${result.message}</p><p>New Book ID: ${result.book_details.new_book_id}</p>`;
-    } catch (error) {
-        console.error(error.message);
-        alert("Failed to add book.");
-    }
-});
-
-// Borrow Book (POST Request)
-document.getElementById("borrow-book-form").addEventListener("submit", async (e) => {
-    e.preventDefault(); // Prevent form submission
-
-    const memberId = document.getElementById("member-id").value;
-    const bookIdBorrow = document.getElementById("book-id-borrow").value;
-    const staffId = document.getElementById("staff-id").value;
-
-    const transactionData = { member_id: memberId, book_id: bookIdBorrow, staff_id: staffId };
-
-    try {
-        const response = await fetch(`${baseUrl}/transactions/borrow/`, {
-            method: "POST",
-            headers: { "Content-Type": "application/json" },
-            body: JSON.stringify(transactionData),
-        });
-
-        if (!response.ok) {
-            const errorData = await response.json();
-            throw new Error(errorData.detail);
-        }
-
-        const result = await response.json();
-        document.getElementById("response").innerHTML =
-            `<p>${result.message}</p><p>New Transaction ID: ${result.transaction_details.new_transaction_id}</p>`;
     
-    } catch (error) {
-        console.error(error.message);
-        document.getElementById("response").innerHTML =
-            `<p style="color: red;">${error.message}</p>`;
+    preloaderAnimation();
+
+    // Response Message Handler
+    function showResponse(message, isError = false) {
+        const responseDiv = document.getElementById('response');
+        const messageEl = document.createElement('div');
+        messageEl.className = `response-message ${isError ? 'error' : 'success'}`;
+        messageEl.innerHTML = `
+            <p>${message}</p>
+            <button class="close-btn" onclick="this.parentElement.remove()">&times;</button>
+        `;
+        responseDiv.prepend(messageEl);
     }
-});
 
-// Return Book (POST Request)
-document.getElementById("return-book-form").addEventListener("submit", async (e) => {
-    e.preventDefault(); // Prevent form submission
+    // Form Clearing Function
+    function clearForm(formId) {
+        document.getElementById(formId).reset();
+    }
 
-    const transactionId = document.getElementById("transaction-id").value;
+    const baseUrl = "http://localhost:8000";
 
-    const transactionData = { transaction_id: transactionId };
+    // Toggle visibility of content 
+    function toggleVisibility(elementId) {
+        const element = document.getElementById(elementId);
+        element.style.display = element.style.display === "none" ? "block" : "none";
+    }
 
-    try {
-        const response = await fetch(`${baseUrl}/transactions/return/`, {
-            method: "POST",
-            headers: { "Content-Type": "application/json" },
-            body: JSON.stringify(transactionData),
-        });
+    // Fetch Books (GET Request) 
+    document.getElementById("fetch-books").addEventListener("click", async () => {
+        const booksList = document.getElementById("books-list");
+        toggleVisibility("books-list");
 
-        if (!response.ok) {
-            const errorData = await response.json();
-            throw new Error(errorData.detail);
+        if (booksList.style.display === "block") {
+            try {
+                const response = await fetch(`${baseUrl}/books/`);
+                if (!response.ok) throw new Error(`Error: ${response.status}`);
+                
+                const books = await response.json();
+                booksList.innerHTML = books.length ? 
+                    books.map(book => `<li>${book.title} - ${book.library_name}</li>`).join('') :
+                    '<li>No books found</li>';
+                
+                showResponse(`Found ${books.length} books`);
+            } catch (error) {
+                showResponse(`Failed to fetch books: ${error.message}`, true);
+            }
         }
+    });
 
-        const result = await response.json();
-        document.getElementById("response").innerHTML =
-            `<p>${result.message}</p><p>Late Fee: $${result.return_details.late_fee}</p>`;
-    
-    } catch (error) {
-        console.error(error.message);
-        document.getElementById("response").innerHTML =
-            `<p style="color: red;">${error.message}</p>`;
-    }
+    // Fetch Overdue Transactions (GET Request) 
+    document.getElementById("fetch-overdue-transactions").addEventListener("click", async () => {
+        const transactionsList = document.getElementById("transactions-list");
+        toggleVisibility("transactions-list");
+
+        if (transactionsList.style.display === "block") {
+            try {
+                const response = await fetch(`${baseUrl}/transactions/overdue/`);
+                if (!response.ok) throw new Error(`Error: ${response.status}`);
+                
+                const transactions = await response.json();
+                transactionsList.innerHTML = transactions.length ? 
+                    transactions.map(t => `<li>${t.member_name} borrowed "${t.book_title}" (Due: ${t.due_date})</li>`).join('') :
+                    '<li>No overdue transactions</li>';
+                
+                showResponse(`Found ${transactions.length} overdue transactions`);
+            } catch (error) {
+                showResponse(`Failed to fetch transactions: ${error.message}`, true);
+            }
+        }
+    });
+
+    // Fetch Book Authors (GET Request) - Updated
+    document.getElementById("fetch-authors-form").addEventListener("submit", async (e) => {
+        e.preventDefault();
+        const bookId = document.getElementById("book-id").value;
+        const authorsList = document.getElementById("authors-list");
+        toggleVisibility("authors-list");
+
+        if (authorsList.style.display === "block") {
+            try {
+                const response = await fetch(`${baseUrl}/books/${bookId}/authors/`);
+                if (!response.ok) throw new Error(`Error: ${response.status}`);
+                
+                const authors = await response.json();
+                authorsList.innerHTML = authors.length ? 
+                    authors.map(a => `<li>${a.first_name} ${a.last_name} (${a.contribution_percentage}%)</li>`).join('') :
+                    '<li>No authors found</li>';
+                
+                showResponse(`Found ${authors.length} authors for book #${bookId}`);
+                clearForm("fetch-authors-form");
+            } catch (error) {
+                showResponse(`Failed to fetch authors: ${error.message}`, true);
+            }
+        }
+    });
+
+    // Add Book (POST Request) 
+    document.getElementById("add-book-form").addEventListener("submit", async (e) => {
+        e.preventDefault();
+        const formData = new FormData(e.target);
+        const bookData = Object.fromEntries(formData.entries());
+
+        try {
+            const response = await fetch(`${baseUrl}/books/`, {
+                method: "POST",
+                headers: { "Content-Type": "application/json" },
+                body: JSON.stringify(bookData)
+            });
+            
+            const result = await response.json();
+            if (!response.ok) throw new Error(result.detail);
+            
+            showResponse(`Book added successfully (ID: ${result.book_details.new_book_id})`);
+            clearForm("add-book-form");
+        } catch (error) {
+            showResponse(`Failed to add book: ${error.message}`, true);
+        }
+    });
+
+    // Borrow Book (POST Request) 
+    document.getElementById("borrow-book-form").addEventListener("submit", async (e) => {
+        e.preventDefault();
+        const formData = new FormData(e.target);
+        const transactionData = Object.fromEntries(formData.entries());
+
+        try {
+            const response = await fetch(`${baseUrl}/transactions/borrow/`, {
+                method: "POST",
+                headers: { "Content-Type": "application/json" },
+                body: JSON.stringify(transactionData)
+            });
+            
+            const result = await response.json();
+            if (!response.ok) throw new Error(result.detail);
+            
+            showResponse(`Transaction created (ID: ${result.transaction_details.new_transaction_id})`);
+            clearForm("borrow-book-form");
+        } catch (error) {
+            showResponse(`Failed to borrow book: ${error.message}`, true);
+        }
+    });
+
+    // Return Book (POST Request) 
+    document.getElementById("return-book-form").addEventListener("submit", async (e) => {
+        e.preventDefault();
+        const transactionId = document.getElementById("transaction-id").value;
+
+        try {
+            const response = await fetch(`${baseUrl}/transactions/return/`, {
+                method: "POST",
+                headers: { "Content-Type": "application/json" },
+                body: JSON.stringify({ transaction_id: transactionId })
+            });
+            
+            const result = await response.json();
+            if (!response.ok) throw new Error(result.detail);
+            
+            showResponse(`Return processed. Late fee: $${result.return_details.late_fee}`);
+            clearForm("return-book-form");
+        } catch (error) {
+            showResponse(`Failed to return book: ${error.message}`, true);
+        }
+    });
 });
