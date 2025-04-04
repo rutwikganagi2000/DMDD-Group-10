@@ -5,33 +5,33 @@ This repository contains the SQL scripts needed to set up and manage the project
 ## Execution Order
 
 1. **DDL Commands:**  
-   - **File(s):** `DDL.sql` (or equivalent)  
+   - **File(s):** `create_tables.sql`  
    - **Action:** Creates the database schema (tables, relationships, constraints).
 
 2. **Insert Commands:**  
-   - **File(s):** `Insert.sql`  
+   - **File(s):** `insert_script.sql`  
    - **Action:** Inserts initial data into the tables.
 
 3. **Encryption:**  
-   - **File(s):** `Encryption.sql`  
+   - **File(s):** `encryption_script.sql`  
    - **Action:** Implements encryption for sensitive data.
 
 4. **Non-Clustered Indexes:**  
-   - **File(s):** `NonClusteredIndexes.sql`  
+   - **File(s):** `indexes_script.sql`  
    - **Action:** Creates non-clustered indexes to optimize performance.
 
 5. **User-Defined Functions (UDF):**  
-   - **File(s):** `UDF.sql`  
+   - **File(s):** `psm_script.sql`  
    - **Action:** Defines custom functions for data processing.
 
 6. **Views:**  
-   - **File(s):** `Views.sql`  
+   - **File(s):** `psm_script.sql`  
    - **Action:** Creates views for simplified data retrieval.
 
 7. **Triggers:**  
-   - **File(s):** `Triggers.sql`  
+   - **File(s):** `psm_script.sql`  
    - **Action:** Sets up triggers to automate tasks upon data changes.
 
 8. **Stored Procedures:**  
-   - **File(s):** `StoredProcedures.sql`  
+   - **File(s):** `psm_script.sql`  
    - **Action:** Defines stored procedures to encapsulate business logic.
