@@ -2,9 +2,9 @@
 USE DMDD_Group10
 GO
 ----------------------------------------------encryption_script.sql:
--- Example column-level encryption for MEMBER.phone using a symmetric key approach in SQL Server. Adjust as needed.
+-- Example column-level encryption for MEMBER.phone and MEMBER.email using a symmetric key approach in SQL Server.
 
--- 1) -- Add encrypted columns for phone and email if they don't already exist
+-- Add encrypted columns for phone and email if they don't already exist
 ALTER TABLE MEMBER
 ADD phone_encrypted VARBINARY(256) NULL,
     email_encrypted VARBINARY(256) NULL;
@@ -41,6 +41,17 @@ CLOSE SYMMETRIC KEY SymKey_DMDD_Group10;
 GO
 
 
+-- Drop original columns
+ALTER TABLE MEMBER
+DROP COLUMN phone, email;
+GO
+
+-- Rename encrypted columns to original names
+EXEC sp_rename 'MEMBER.phone_encrypted', 'phone', 'COLUMN';
+EXEC sp_rename 'MEMBER.email_encrypted', 'email', 'COLUMN';
+GO
+
+
 -- Open the symmetric key for decryption
 
 OPEN SYMMETRIC KEY SymKey_DMDD_Group10
@@ -48,8 +59,8 @@ DECRYPTION BY CERTIFICATE Cert_DMDD_Group10;
 
 SELECT 
     member_id,
-    CONVERT(VARCHAR(20), DECRYPTBYKEY(phone_encrypted)) AS DecryptedPhone,
-    CONVERT(VARCHAR(100), DECRYPTBYKEY(email_encrypted)) AS DecryptedEmail
+    CONVERT(VARCHAR(20), DECRYPTBYKEY(phone)) AS DecryptedPhone,
+    CONVERT(VARCHAR(100), DECRYPTBYKEY(email)) AS DecryptedEmail
 FROM MEMBER;
 
 CLOSE SYMMETRIC KEY SymKey_DMDD_Group10;

@@ -1,6 +1,6 @@
 USE DMDD_Group10
 GO
------------------- Below are at least 3 non-clustered indexes. Adjust as desired:-----------------------
+------------------ Below are non-clustered indexes -----------------------
 
 -- 1) Index on MEMBER last_name for faster lookups
 CREATE NONCLUSTERED INDEX idx_Member_LastName
