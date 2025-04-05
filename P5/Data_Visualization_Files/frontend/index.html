@@ -1,0 +1,91 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <link href="https://fonts.googleapis.com/css2?family=Della+Respira&family=Inter:wght@400;500;700&display=swap"
+    rel="stylesheet">
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.11.4/gsap.min.js"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.11.4/ScrollTrigger.min.js"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.11.4/ScrollSmoother.min.js"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.11.4/Draggable.min.js"></script>
+  <title>Library Management System</title>
+  <link rel="stylesheet" href="styles.css">
+  <script src="script.js" defer></script>
+</head>
+
+<body>
+  <!-- Preloader -->
+  <div class="preloader">
+    <div class="greeting-container">
+      <h1 class="greeting">. Library Management System</h1>
+    </div>
+  </div>
+
+
+  <h1>Library Management System</h1>
+
+  <!-- Fetch Books -->
+  <h2>Books</h2>
+  <button id="fetch-books">Fetch Books</button>
+  <ul id="books-list" style="display: none;"></ul>
+
+  <!-- Fetch Overdue Transactions -->
+  <h2>Overdue Transactions</h2>
+  <button id="fetch-overdue-transactions">Fetch Overdue Transactions</button>
+  <ul id="transactions-list" style="display: none;"></ul>
+
+  <!-- Fetch Book Authors -->
+  <h2>Book Authors</h2>
+  <form id="fetch-authors-form">
+    <label for="book-id">Enter Book ID:</label>
+    <input type="number" id="book-id" required>
+    <button type="submit">Fetch Authors</button>
+  </form>
+  <ul id="authors-list" style="display: none;"></ul>
+
+  <!-- Add Book Form -->
+  <h2>Add New Book</h2>
+  <form id="add-book-form">
+    <label for="library-id">Library ID:</label>
+    <input type="number" id="library-id" required><br>
+    <label for="genre-id">Genre ID:</label>
+    <input type="number" id="genre-id" required><br>
+    <label for="publisher-id">Publisher ID:</label>
+    <input type="number" id="publisher-id" required><br>
+    <label for="title">Title:</label>
+    <input type="text" id="title" required><br>
+    <label for="isbn">ISBN:</label>
+    <input type="text" id="isbn" required><br>
+    <label for="publication-date">Publication Date:</label>
+    <input type="date" id="publication-date" required><br>
+    <button type="submit">Add Book</button>
+  </form>
+
+  <!-- Borrow Book Form -->
+  <h2>Borrow Book</h2>
+  <form id="borrow-book-form">
+    <label for="member-id">Member ID:</label>
+    <input type="number" id="member-id" required><br>
+    <label for="book-id-borrow">Book ID:</label>
+    <input type="number" id="book-id-borrow" required><br>
+    <label for="staff-id">Staff ID:</label>
+    <input type="number" id="staff-id" required><br>
+    <button type="submit">Borrow Book</button>
+  </form>
+
+  <!-- Return Book Form -->
+  <h2>Return Book</h2>
+  <form id="return-book-form">
+    <label for="transaction-id">Transaction ID:</label>
+    <input type="number" id="transaction-id" required><br>
+    <button type="submit">Return Book</button>
+  </form>
+
+  <!-- Response -->
+  <h2>Response</h2>
+  <div id="response"></div>
+</body>
+
+</html>
