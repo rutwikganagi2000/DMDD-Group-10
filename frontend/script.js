@@ -99,7 +99,7 @@ function toggleVisibility(elementId) {
 // Fetch Books (GET Request) 
 document.getElementById("fetch-books").addEventListener("click", async () => {
     if (!checkUserAuthentication()) return;
-    
+
     const booksList = document.getElementById("books-list");
     toggleVisibility("books-list");
 
@@ -110,7 +110,7 @@ document.getElementById("fetch-books").addEventListener("click", async () => {
 
             const books = await response.json();
             booksList.innerHTML = books.length ?
-                books.map(book => `<li>${book.title} - ${book.library_name}</li>`).join('') :
+                books.map(book => `<li>Book ID: ${book.book_id}, ${book.title} - ${book.library_name}</li>`).join('') :
                 '<li>No books found</li>';
 
             showResponse(`Found ${books.length} books`);
