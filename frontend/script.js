@@ -1,3 +1,6 @@
+// Base URL for your FastAPI backend
+const baseUrl = "http://localhost:8000";
+
 document.addEventListener('DOMContentLoaded', () => {
     // Preloader Animation
     function preloaderAnimation() {
@@ -37,12 +40,36 @@ document.addEventListener('DOMContentLoaded', () => {
     checkUserAuthentication();
 });
 
-// Check user authentication
+// Check user authentication and role-based access
 function checkUserAuthentication() {
     if (!localStorage.getItem('loggedIn')) {
         window.location.href = 'login.html';
         return false;
     }
+    
+    // Get user data and role
+    try {
+        const userData = JSON.parse(localStorage.getItem('userData') || '{}');
+        const userRole = localStorage.getItem('userRole');
+        
+        // Display welcome message
+        const userWelcomeElement = document.getElementById('user-welcome');
+        if (userWelcomeElement) {
+            userWelcomeElement.textContent = `Welcome, ${userData.full_name} (${userRole})`;
+        }
+        
+        // Role-based access control
+        if (userRole === 'staff') {
+            // Staff can see everything
+            document.getElementById('staff-only-sections').style.display = 'block';
+        } else if (userRole === 'member') {
+            // Members can only see member sections (which are visible by default)
+            document.getElementById('staff-only-sections').style.display = 'none';
+        }
+    } catch (error) {
+        console.error("Error processing user data:", error);
+    }
+    
     return true;
 }
 
@@ -62,8 +89,6 @@ function showResponse(message, isError = false) {
 function clearForm(formId) {
     document.getElementById(formId).reset();
 }
-
-const baseUrl = "http://localhost:8000";
 
 // Toggle visibility of content 
 function toggleVisibility(elementId) {
@@ -96,28 +121,30 @@ document.getElementById("fetch-books").addEventListener("click", async () => {
 });
 
 // Fetch Overdue Transactions (GET Request) 
-document.getElementById("fetch-overdue-transactions").addEventListener("click", async () => {
-    if (!checkUserAuthentication()) return;
-    
-    const transactionsList = document.getElementById("transactions-list");
-    toggleVisibility("transactions-list");
+if (document.getElementById("fetch-overdue-transactions")) {
+    document.getElementById("fetch-overdue-transactions").addEventListener("click", async () => {
+        if (!checkUserAuthentication()) return;
+        
+        const transactionsList = document.getElementById("transactions-list");
+        toggleVisibility("transactions-list");
 
-    if (transactionsList.style.display === "block") {
-        try {
-            const response = await fetch(`${baseUrl}/transactions/overdue/`);
-            if (!response.ok) throw new Error(`Error: ${response.status}`);
+        if (transactionsList.style.display === "block") {
+            try {
+                const response = await fetch(`${baseUrl}/transactions/overdue/`);
+                if (!response.ok) throw new Error(`Error: ${response.status}`);
 
-            const transactions = await response.json();
-            transactionsList.innerHTML = transactions.length ?
-                transactions.map(t => `<li>${t.member_name} borrowed "${t.book_title}" (Due: ${t.due_date})</li>`).join('') :
-                '<li>No overdue transactions</li>';
+                const transactions = await response.json();
+                transactionsList.innerHTML = transactions.length ?
+                    transactions.map(t => `<li>${t.member_name} borrowed "${t.book_title}" (Due: ${t.due_date})</li>`).join('') :
+                    '<li>No overdue transactions</li>';
 
-            showResponse(`Found ${transactions.length} overdue transactions`);
-        } catch (error) {
-            showResponse(`Failed to fetch transactions: ${error.message}`, true);
+                showResponse(`Found ${transactions.length} overdue transactions`);
+            } catch (error) {
+                showResponse(`Failed to fetch transactions: ${error.message}`, true);
+            }
         }
-    }
-});
+    });
+}
 
 // Fetch Book Authors (GET Request) 
 document.getElementById("fetch-authors-form").addEventListener("submit", async (e) => {
@@ -153,7 +180,9 @@ if (document.getElementById("add-book-form")) {
         
         // Check if user is staff
         const userData = JSON.parse(localStorage.getItem('userData') || '{}');
-        if (userData.role !== 'staff') {
+        const userRole = localStorage.getItem('userRole');
+        
+        if (userRole !== 'staff') {
             showResponse("You don't have permission to add books", true);
             return;
         }
@@ -189,67 +218,86 @@ if (document.getElementById("add-book-form")) {
 }
 
 // Borrow Book (POST Request)
-document.getElementById("borrow-book-form").addEventListener("submit", async (e) => {
-    e.preventDefault();
-    if (!checkUserAuthentication()) return;
+if (document.getElementById("borrow-book-form")) {
+    document.getElementById("borrow-book-form").addEventListener("submit", async (e) => {
+        e.preventDefault();
+        if (!checkUserAuthentication()) return;
 
-    // Auto-fill member ID if logged in as member
-    const userData = JSON.parse(localStorage.getItem('userData') || '{}');
-    
-    // Collect form data
-    const transactionData = {
-        member_id: document.getElementById("member-id").value,
-        book_id: document.getElementById("book-id-borrow").value,
-        staff_id: document.getElementById("staff-id").value,
-    };
-
-    try {
-        // Send POST request to Borrow Book API
-        const response = await fetch(`${baseUrl}/transactions/borrow/`, {
-            method: "POST",
-            headers: { "Content-Type": "application/json" },
-            body: JSON.stringify(transactionData),
-        });
-
-        if (!response.ok) {
-            const errorData = await response.json();
-            throw new Error(errorData.detail || "Failed to borrow book");
+        // Check if user is staff
+        const userData = JSON.parse(localStorage.getItem('userData') || '{}');
+        const userRole = localStorage.getItem('userRole');
+        
+        if (userRole !== 'staff') {
+            showResponse("You don't have permission to borrow books", true);
+            return;
         }
+        
+        // Collect form data
+        const transactionData = {
+            member_id: document.getElementById("member-id").value,
+            book_id: document.getElementById("book-id-borrow").value,
+            staff_id: document.getElementById("staff-id").value,
+        };
 
-        const result = await response.json();
-        showResponse(`Transaction created successfully (ID: ${result.transaction_details.new_transaction_id})`);
-        clearForm("borrow-book-form");
-    } catch (error) {
-        showResponse(`Failed to borrow book: ${error.message}`, true);
-    }
-});
+        try {
+            // Send POST request to Borrow Book API
+            const response = await fetch(`${baseUrl}/transactions/borrow/`, {
+                method: "POST",
+                headers: { "Content-Type": "application/json" },
+                body: JSON.stringify(transactionData),
+            });
+
+            if (!response.ok) {
+                const errorData = await response.json();
+                throw new Error(errorData.detail || "Failed to borrow book");
+            }
+
+            const result = await response.json();
+            showResponse(`Transaction created successfully (ID: ${result.transaction_details.new_transaction_id})`);
+            clearForm("borrow-book-form");
+        } catch (error) {
+            showResponse(`Failed to borrow book: ${error.message}`, true);
+        }
+    });
+}
 
 // Return Book (POST Request) 
-document.getElementById("return-book-form").addEventListener("submit", async (e) => {
-    e.preventDefault();
-    if (!checkUserAuthentication()) return;
-    
-    const transactionId = document.getElementById("transaction-id").value;
-
-    try {
-        const response = await fetch(`${baseUrl}/transactions/return/`, {
-            method: "POST",
-            headers: { "Content-Type": "application/json" },
-            body: JSON.stringify({ transaction_id: transactionId })
-        });
-
-        if (!response.ok) {
-            const errorData = await response.json();
-            throw new Error(errorData.detail || "Failed to return book");
+if (document.getElementById("return-book-form")) {
+    document.getElementById("return-book-form").addEventListener("submit", async (e) => {
+        e.preventDefault();
+        if (!checkUserAuthentication()) return;
+        
+        // Check if user is staff
+        const userData = JSON.parse(localStorage.getItem('userData') || '{}');
+        const userRole = localStorage.getItem('userRole');
+        
+        if (userRole !== 'staff') {
+            showResponse("You don't have permission to return books", true);
+            return;
         }
+        
+        const transactionId = document.getElementById("transaction-id").value;
 
-        const result = await response.json();
-        showResponse(`Return processed. Late fee: $${result.return_details.late_fee}`);
-        clearForm("return-book-form");
-    } catch (error) {
-        showResponse(`Failed to return book: ${error.message}`, true);
-    }
-});
+        try {
+            const response = await fetch(`${baseUrl}/transactions/return/`, {
+                method: "POST",
+                headers: { "Content-Type": "application/json" },
+                body: JSON.stringify({ transaction_id: transactionId })
+            });
+
+            if (!response.ok) {
+                const errorData = await response.json();
+                throw new Error(errorData.detail || "Failed to return book");
+            }
+
+            const result = await response.json();
+            showResponse(`Return processed. Late fee: $${result.return_details.late_fee}`);
+            clearForm("return-book-form");
+        } catch (error) {
+            showResponse(`Failed to return book: ${error.message}`, true);
+        }
+    });
+}
 
 // Sign-out handler
 document.getElementById('sign-out-btn').addEventListener('click', () => {
