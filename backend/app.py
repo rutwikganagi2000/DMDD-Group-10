@@ -3,8 +3,8 @@ from sqlalchemy.orm import Session
 from fastapi.middleware.cors import CORSMiddleware
 
 from .database import SessionLocal
-from .crud import get_books, get_book_authors, get_overdue_transactions, add_new_book, borrow_book, return_book
-from .models import BookCreate, BorrowTransactionCreate, ReturnTransactionCreate
+from .crud import get_books, get_book_authors, get_overdue_transactions, add_new_book, borrow_book, return_book, authenticate_user
+from .models import BookCreate, BorrowTransactionCreate, ReturnTransactionCreate, UserLogin
 
 app = FastAPI()
 
@@ -68,3 +68,23 @@ def complete_return_transaction(transaction: ReturnTransactionCreate, db: Sessio
     
     except Exception as e:
         raise HTTPException(status_code=400, detail=str(e))
+
+@app.post("/login/")
+def login(login_data: UserLogin, db: Session = Depends(get_db)):
+    user = authenticate_user(
+        db=db, 
+        username=login_data.username, 
+        password=login_data.password, 
+        role=login_data.role
+    )
+    
+    if not user:
+        raise HTTPException(
+            status_code=401,
+            detail="Invalid username, password, or role"
+        )
+    
+    return {
+        "message": "Login successful", 
+        "user": user
+    }

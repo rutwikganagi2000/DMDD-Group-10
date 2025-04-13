@@ -13,6 +13,7 @@
   <title>Library Management System</title>
   <link rel="stylesheet" href="styles.css">
   <script src="script.js" defer></script>
+
 </head>
 
 <body>
@@ -23,8 +24,14 @@
     </div>
   </div>
 
+  <header class="header-container">
+    <h1>Library Management System</h1>
+    <button id="sign-out-btn" class="btn sign-out-btn">Sign Out</button>
+  </header>
 
-  <h1>Library Management System</h1>
+
+
+
 
   <!-- Fetch Books -->
   <h2>Books</h2>
@@ -87,5 +94,17 @@
   <h2>Response</h2>
   <div id="response"></div>
 </body>
+
+<script>
+  // Add this to prevent direct access without login
+  if (!localStorage.getItem('loggedIn')) {
+    window.location.href = 'login.html';
+  }
+</script>
+
+
+
+<script src="script.js"></script>
+
 
 </html>

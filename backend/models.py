@@ -52,3 +52,9 @@ class BorrowTransactionCreate(BaseModel):
 # Pydantic model for returning a book transaction
 class ReturnTransactionCreate(BaseModel):
     transaction_id: int
+
+# Pydantic model for user login
+class UserLogin(BaseModel):
+    username: str
+    password: str
+    role: str

@@ -1,0 +1,85 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Library Login</title>
+    <link rel="stylesheet" href="styles.css">
+    <link href="https://fonts.googleapis.com/css2?family=Della+Respira&family=Inter:wght@400;500;700&display=swap"
+        rel="stylesheet">
+</head>
+
+<body>
+    <!-- Login Page -->
+    <div class="login-container">
+        <h1>Welcome to Library System</h1>
+        <p class="login-subtitle">Please enter your credentials to continue</p>
+        <form id="login-form">
+            <label for="role">Select Role:</label>
+            <select id="role" name="role" required>
+                <option value="staff">Staff</option>
+                <option value="member">Member</option>
+            </select>
+
+            <label for="username">Username:</label>
+            <input type="text" id="username" name="username" placeholder="Enter your username" required>
+
+            <label for="password">Password:</label>
+            <input type="password" id="password" name="password" placeholder="Enter your password" required>
+
+            <div id="login-error" class="error-message" style="display: none;"></div>
+
+            <button type="submit" class="btn">Login</button>
+        </form>
+        
+    </div>
+
+    <!-- Embedded JavaScript -->
+    <script>
+        document.getElementById('login-form').addEventListener('submit', async function (e) {
+            e.preventDefault();
+            
+            const loginError = document.getElementById('login-error');
+            loginError.style.display = 'none';
+            
+            const role = document.getElementById('role').value;
+            const username = document.getElementById('username').value.trim();
+            const password = document.getElementById('password').value.trim();
+
+            try {
+                const response = await fetch('http://localhost:8000/login/', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json'
+                    },
+                    body: JSON.stringify({
+                        username: username,
+                        password: password,
+                        role: role
+                    })
+                });
+
+                if (!response.ok) {
+                    const errorData = await response.json();
+                    throw new Error(errorData.detail || 'Login failed');
+                }
+
+                const result = await response.json();
+                
+                // Store user information in localStorage
+                localStorage.setItem('loggedIn', 'true');
+                localStorage.setItem('userRole', role);
+                localStorage.setItem('userData', JSON.stringify(result.user));
+                
+                // Redirect to index.html
+                window.location.href = 'index.html';
+            } catch (error) {
+                loginError.textContent = error.message;
+                loginError.style.display = 'block';
+            }
+        });
+    </script>
+</body>
+
+</html>
