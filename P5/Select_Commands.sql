@@ -42,3 +42,5 @@ SELECT * FROM FEEDBACK;
 
 -- Select all records from FINE table
 SELECT * FROM FINE;
+
+SELECT * FROM USER_AUTH;

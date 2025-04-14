@@ -218,3 +218,23 @@ VALUES
 (6, 2.00, '2023-03-26', 'Paid'),
 (7, 6.00, '2023-04-16', 'Unpaid'),
 (9, 8.00, '2023-05-02', 'Unpaid');
+GO
+
+-- Insert default member users
+INSERT INTO USER_AUTH (username, password, role, user_id)
+VALUES
+('john_smith', 'password123', 'member', 1),
+('sarah_j', 'pass', 'member', 2),
+('mwilliams', 'mikepass', 'member', 3),
+('emily_b', 'emilypass', 'member', 4),
+('david_j', 'davidpass', 'member', 5);
+GO
+
+-- Insert default staff users
+INSERT INTO USER_AUTH (username, password, role, user_id)
+VALUES
+('pwilson', '12345', 'staff', 1),
+('rmoore', '123', 'staff', 2),
+('staylor', 'staffpass3', 'staff', 3),
+('janderson', 'staffpass4', 'staff', 4),
+('lthomas', 'staffpass5', 'staff', 5);

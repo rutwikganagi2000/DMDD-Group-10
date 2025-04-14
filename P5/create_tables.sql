@@ -197,3 +197,14 @@ CREATE TABLE MEMBERSHIP (
     CONSTRAINT FK_Membership_Member FOREIGN KEY (member_id) REFERENCES MEMBER(member_id),
     CONSTRAINT FK_Membership_Library FOREIGN KEY (library_id) REFERENCES LIBRARY(library_id)
 );
+
+-- Create USER_AUTH table
+CREATE TABLE USER_AUTH (
+    auth_id INT PRIMARY KEY IDENTITY(1,1),
+    username VARCHAR(50) NOT NULL UNIQUE,
+    password VARCHAR(255) NOT NULL,
+    role VARCHAR(20) NOT NULL,
+    user_id INT NOT NULL,
+    CONSTRAINT chk_role CHECK (role IN ('member', 'staff'))
+);
+

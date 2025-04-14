@@ -1,5 +1,6 @@
 from sqlalchemy.orm import Session
 from sqlalchemy.sql import text
+from .security import verify_password
 
 # Helper function to convert SQLAlchemy result rows into dictionaries
 def convert_to_dict(results):
@@ -98,10 +99,11 @@ def return_book(db: Session, transaction_data: dict):
         db.rollback()  # Rollback in case of error
         raise e  # Re-raise the exception for FastAPI to handle
     
-# User authentication
+# User authentication with password hashing
 def authenticate_user(db: Session, username: str, password: str, role: str):
+    # First, get the user by username and role only
     query = text("""
-        SELECT u.auth_id, u.username, u.role, u.user_id,
+        SELECT u.auth_id, u.username, u.password, u.role, u.user_id,
                CASE 
                    WHEN u.role = 'member' THEN CONCAT(m.first_name, ' ', m.last_name)
                    WHEN u.role = 'staff' THEN CONCAT(s.first_name, ' ', s.last_name)
@@ -109,12 +111,31 @@ def authenticate_user(db: Session, username: str, password: str, role: str):
         FROM USER_AUTH u
         LEFT JOIN MEMBER m ON u.user_id = m.member_id AND u.role = 'member'
         LEFT JOIN STAFF s ON u.user_id = s.staff_id AND u.role = 'staff'
-        WHERE u.username = :username AND u.password = :password AND u.role = :role
+        WHERE u.username = :username AND u.role = :role
     """)
     
-    result = db.execute(query, {"username": username, "password": password, "role": role}).fetchone()
+    result = db.execute(query, {"username": username, "role": role}).fetchone()
     
     if result is None:
         return None
     
-    return convert_to_dict([result])[0]
+    # Convert to dict for easier handling
+    user_dict = convert_to_dict([result])[0]
+    
+    # For handling existing plain text passwords
+    if user_dict["password"] == password:
+        # This is a fallback for existing users; in a real system,
+        # you might want to update their hash in the database at this point
+        user_dict.pop("password", None)  # Remove password from return data
+        return user_dict
+    
+    # For handling properly hashed passwords (future-proof)
+    try:
+        if verify_password(password, user_dict["password"]):
+            user_dict.pop("password", None)  # Remove password from return data
+            return user_dict
+    except:
+        # If verification fails or has format issues, return None
+        pass
+    
+    return None
